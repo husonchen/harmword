@@ -1,5 +1,9 @@
 #encoding:utf-8
 import string
+import Cut.YahaCuttor
+import Cut.NGramCuttor
+import Cut.JiebaCuttor
+
 from numpy import *
 wordsweight = {} #特征词的权重
 threshold = 0.49 #TONE训练法的阈值
@@ -36,23 +40,18 @@ def gradientup(wordmap,weight,rate,p):
 
 
 if __name__ == '__main__':
-    file = open("train.txt")
+    file = open("test.txt")
+    
+#     Cut.YahaCuttor.init()
     for line in file.readlines():
         words = line.split(' ')
         wordsmap = {}
         #去除标点符号
         delset = string.punctuation
         l = words[0].translate(None,delset)
-        #把该条句子按照4-gram（中文2个字）划分特征
-        for i in range(0,len(l.decode('utf-8'))-1):
-            word = l.decode('utf-8')[i:i+2].encode('utf-8')
-#             print word
-            if wordsmap.has_key(word) == False:
-                wordsmap[word] = 0
-            wordsmap[word] += 1
-            #添加到特征权重
-            if wordsweight.has_key(word) == False:
-                wordsweight[word] = 0
+        
+#         Cut.YahaCuttor.cutstring(l, wordsmap, wordsweight)
+        Cut.JiebaCuttor.cutstring(l, wordsmap, wordsweight)
         
         #计算向量x和w的乘积
         xw = arraymult(wordsmap, wordsweight)
@@ -67,15 +66,15 @@ if __name__ == '__main__':
         if abs(p - 0.5) < threshold or predict != words[1]:
             #正例则梯度上升
             if words[1] == "spam":
-                print "spam:"+line
+                #print "spam:"+line
                 gradientup(wordsmap,wordsweight,rate,p)
             else:
                 #反例则梯度下降
-                print "ham:"+line
+                #print "ham:"+line
                 gradientdes(wordsmap,wordsweight,rate,p)
     
     #保存结果
-    filesave = open('result.txt', 'w')
+    filesave = open('result_jieba.txt', 'w')
     for k in wordsweight.keys():
         filesave.write(k + " " + str(wordsweight[k]) + ' \r\n')
     filesave.close()

@@ -6,6 +6,7 @@ Created on Feb 26, 2015
 import Train
 from numpy import *
 import string
+import Cut.JiebaCuttor
 
 wordsweight = {}
 
@@ -17,13 +18,8 @@ def prediction(wordstr,weight):
     #去除标点符号
     delset = string.punctuation
     l = wordstr.translate(None, delset)
-    # 把该条句子按照4-gram（中文2个字）划分特征
-    for i in range(0, len(l.decode('utf-8')) - 1):
-        word = l.decode('utf-8')[i:i + 2].encode('utf-8')
-#         print word
-        if wordsmap.has_key(word) == False:
-            wordsmap[word] = 0
-        wordsmap[word] += 1
+    
+    Cut.JiebaCuttor.cutstring(l, wordsmap, weight)
         
     # 计算向量x和w的乘积
     xw = Train.arraymult(wordsmap, weight)
@@ -35,7 +31,7 @@ def prediction(wordstr,weight):
     
 if __name__ == '__main__':
     #读取权重文件
-    resultfile = open("result.txt")
+    resultfile = open("result_jieba.txt")
     for line in resultfile.readlines():
         temp = line.split(' ')
         wordsweight[temp[0]] = float(temp[1])
